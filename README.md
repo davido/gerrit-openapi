@@ -92,6 +92,14 @@ commit on demand):
 | Java | [gerrit-sdk-java-client](https://github.com/davido/gerrit-sdk-java-client) | [gerrit-sdk-java](https://github.com/davido/gerrit-sdk-java) |
 | Kotlin | [gerrit-sdk-kotlin-client](https://github.com/davido/gerrit-sdk-kotlin-client) | [gerrit-sdk-kotlin](https://github.com/davido/gerrit-sdk-kotlin) |
 
+## Statistics
+
+[STATISTICS.md](STATISTICS.md) summarizes the published surface — endpoint, schema,
+and field counts, a per-area breakdown (Changes, Projects, Accounts, …), and a
+release-over-release history table. It is regenerated on every `./update.sh` from the
+same specs published here; the figures are computed once in the Gerrit tree and only
+formatted here, so there is no second source to drift.
+
 ## Versioning
 
 Each document carries the Gerrit release label in `info.version` (e.g.

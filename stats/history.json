@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "releases": [
+    {
+      "version": "3.15.0-SNAPSHOT",
+      "endpoints": {
+        "paths": 248,
+        "operations": 337,
+        "by_method": {
+          "DELETE": 36,
+          "GET": 159,
+          "POST": 92,
+          "PUT": 50
+        },
+        "with_request_body": 138,
+        "with_params": 312,
+        "domains": 7
+      },
+      "schemas": {
+        "count": 288,
+        "enums": 45,
+        "fields": 1176
+      },
+      "documentation": {
+        "spec_operations": 337,
+        "mined_entries": 334,
+        "with_summary": 334,
+        "with_example": 208,
+        "coverage_pct": 99.1,
+        "unmatched_doc_sections": 4,
+        "skipped_examples": 93,
+        "dropped_request_examples": 2,
+        "merged_sections": 8
+      },
+      "by_area": {
+        "changes": {
+          "ops": 127,
+          "GET": 60,
+          "POST": 43,
+          "PUT": 9,
+          "DELETE": 15,
+          "documented": 127
+        },
+        "projects": {
+          "ops": 70,
+          "GET": 34,
+          "POST": 17,
+          "PUT": 13,
+          "DELETE": 6,
+          "documented": 70
+        },
+        "accounts": {
+          "ops": 60,
+          "GET": 28,
+          "POST": 7,
+          "PUT": 16,
+          "DELETE": 9,
+          "documented": 60
+        },
+        "config": {
+          "ops": 42,
+          "GET": 22,
+          "POST": 15,
+          "PUT": 4,
+          "DELETE": 1,
+          "documented": 42
+        },
+        "groups": {
+          "ops": 30,
+          "GET": 12,
+          "POST": 7,
+          "PUT": 7,
+          "DELETE": 4,
+          "documented": 30
+        },
+        "plugins": {
+          "ops": 7,
+          "GET": 2,
+          "POST": 3,
+          "PUT": 1,
+          "DELETE": 1,
+          "documented": 7
+        },
+        "access": {
+          "ops": 1,
+          "GET": 1,
+          "POST": 0,
+          "PUT": 0,
+          "DELETE": 0,
+          "documented": 1
+        }
+      },
+      "date": "2026-09-10"
+    }
+  ]
+}

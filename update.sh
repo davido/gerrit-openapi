@@ -23,8 +23,10 @@ PLUGINS=(
   "code-owners code_owners_openapi_json"
 )
 
-echo "1/3 build the OpenAPI documents in $SRC"
-TARGETS="//tools/openapi:openapi_json"
+echo "1/4 build the OpenAPI documents in $SRC"
+# openapi_json also drives the miner's worklist report (openapi-overrides-report.json),
+# which the statistics step reads; name it so it is always present in bazel-bin.
+TARGETS="//tools/openapi:openapi_json //tools/openapi:openapi-overrides-report.json"
 for d in "${DOMAINS[@]}"; do TARGETS="$TARGETS //tools/openapi:openapi_${d}_json"; done
 for entry in "${PLUGINS[@]}"; do
   set -- $entry
@@ -33,7 +35,7 @@ done
 ( cd "$SRC" && bazel build $TARGETS 2>&1 | tail -1 )
 
 BIN="$SRC/bazel-bin"
-echo "2/3 copy build outputs into the published tree"
+echo "2/4 copy build outputs into the published tree"
 cp "$BIN/tools/openapi/all-domain-openapi.generated.json" core/openapi.json
 for d in "${DOMAINS[@]}"; do
   cp "$BIN/tools/openapi/${d}-openapi.generated.json" "core/domains/${d}.json"
@@ -46,7 +48,7 @@ done
 # bazel outputs are read-only; the published copies are normal files.
 chmod -R u+w core plugins
 
-echo "3/3 sanity: the domain slices must partition the monolith"
+echo "3/4 sanity: the domain slices must partition the monolith"
 python3 - <<'PY'
 import glob, json, sys
 mono = len(json.load(open("core/openapi.json")).get("paths", {}))
@@ -58,6 +60,16 @@ print(f"   core paths={mono}  sum(core/domains)={areas}  version={ver}  "
 sys.exit(0 if ok else 1)
 PY
 
+echo "4/4 refresh statistics (rendered from the tree's stats tool -- one source, no recompute)"
+# The Gerrit stats tool is the single place that counts the surface; it emits JSON and
+# gen_stats.py only formats it into STATISTICS.md + accumulates the per-release history.
+SNAP=$(mktemp)
+python3 "$SRC/tools/openapi/py/stats_report.py" --json \
+  "$BIN/tools/openapi/all-domain-openapi.generated.json" \
+  "$BIN/tools/openapi/openapi-overrides-report.json" > "$SNAP"
+python3 tools/gen_stats.py --stats "$SNAP"
+rm -f "$SNAP"
+
 echo
 echo "done. Review the diff and commit; at a release, tag to match info.version:"
-git status --short core plugins || true
+git status --short core plugins STATISTICS.md stats || true
