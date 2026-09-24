@@ -4,31 +4,31 @@
     {
       "version": "3.15.0-SNAPSHOT",
       "endpoints": {
-        "paths": 248,
-        "operations": 337,
+        "paths": 250,
+        "operations": 339,
         "by_method": {
           "DELETE": 36,
-          "GET": 159,
+          "GET": 161,
           "POST": 92,
           "PUT": 50
         },
         "with_request_body": 138,
-        "with_params": 312,
+        "with_params": 315,
         "domains": 7
       },
       "schemas": {
         "count": 288,
         "enums": 45,
-        "fields": 1176
+        "fields": 1177
       },
       "documentation": {
-        "spec_operations": 337,
-        "mined_entries": 334,
-        "with_summary": 334,
-        "with_example": 208,
+        "spec_operations": 339,
+        "mined_entries": 336,
+        "with_summary": 336,
+        "with_example": 211,
         "coverage_pct": 99.1,
         "unmatched_doc_sections": 4,
-        "skipped_examples": 93,
+        "skipped_examples": 127,
         "dropped_request_examples": 2,
         "merged_sections": 8
       },
@@ -42,12 +42,12 @@
           "documented": 127
         },
         "projects": {
-          "ops": 70,
-          "GET": 34,
+          "ops": 72,
+          "GET": 36,
           "POST": 17,
           "PUT": 13,
           "DELETE": 6,
-          "documented": 70
+          "documented": 72
         },
         "accounts": {
           "ops": 60,
@@ -90,7 +90,7 @@
           "documented": 1
         }
       },
-      "date": "2026-09-10"
+      "date": "2026-09-24"
     }
   ]
 }
