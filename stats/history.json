@@ -2,6 +2,97 @@
   "schema": 1,
   "releases": [
     {
+      "version": "3.16.0-SNAPSHOT",
+      "endpoints": {
+        "paths": 249,
+        "operations": 338,
+        "by_method": {
+          "DELETE": 36,
+          "GET": 161,
+          "POST": 91,
+          "PUT": 50
+        },
+        "with_request_body": 137,
+        "with_params": 315,
+        "domains": 7
+      },
+      "schemas": {
+        "count": 287,
+        "enums": 45,
+        "fields": 1175
+      },
+      "documentation": {
+        "spec_operations": 338,
+        "mined_entries": 335,
+        "with_summary": 335,
+        "with_example": 210,
+        "coverage_pct": 99.1,
+        "unmatched_doc_sections": 5,
+        "skipped_examples": 127,
+        "dropped_request_examples": 2,
+        "merged_sections": 8
+      },
+      "by_area": {
+        "changes": {
+          "ops": 127,
+          "GET": 60,
+          "POST": 43,
+          "PUT": 9,
+          "DELETE": 15,
+          "documented": 127
+        },
+        "projects": {
+          "ops": 72,
+          "GET": 36,
+          "POST": 17,
+          "PUT": 13,
+          "DELETE": 6,
+          "documented": 72
+        },
+        "accounts": {
+          "ops": 60,
+          "GET": 28,
+          "POST": 7,
+          "PUT": 16,
+          "DELETE": 9,
+          "documented": 60
+        },
+        "config": {
+          "ops": 41,
+          "GET": 22,
+          "POST": 14,
+          "PUT": 4,
+          "DELETE": 1,
+          "documented": 41
+        },
+        "groups": {
+          "ops": 30,
+          "GET": 12,
+          "POST": 7,
+          "PUT": 7,
+          "DELETE": 4,
+          "documented": 30
+        },
+        "plugins": {
+          "ops": 7,
+          "GET": 2,
+          "POST": 3,
+          "PUT": 1,
+          "DELETE": 1,
+          "documented": 7
+        },
+        "access": {
+          "ops": 1,
+          "GET": 1,
+          "POST": 0,
+          "PUT": 0,
+          "DELETE": 0,
+          "documented": 1
+        }
+      },
+      "date": "2026-10-28"
+    },
+    {
       "version": "3.15.0-SNAPSHOT",
       "endpoints": {
         "paths": 249,
