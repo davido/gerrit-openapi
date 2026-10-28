@@ -39,7 +39,18 @@ for entry in "${PLUGINS[@]}"; do
   set -- $entry
   TARGETS="$TARGETS //plugins/$1:$2"
 done
-( cd "$SRC" && bazel build $TARGETS 2>&1 | tail -1 )
+# Keep success quiet (just bazel's summary line) but surface the full log on failure --
+# piping straight to `tail -1` would swallow the actual error and mask bazel's exit code.
+BUILD_LOG=$(mktemp)
+if ( cd "$SRC" && bazel build $TARGETS ) >"$BUILD_LOG" 2>&1; then
+  tail -1 "$BUILD_LOG"
+  rm -f "$BUILD_LOG"
+else
+  echo "   build FAILED in $SRC -- bazel output:" >&2
+  cat "$BUILD_LOG" >&2
+  rm -f "$BUILD_LOG"
+  exit 1
+fi
 
 BIN="$SRC/bazel-bin"
 echo "2/5 copy build outputs into the published tree"
