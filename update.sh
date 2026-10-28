@@ -20,7 +20,7 @@ SRC=${1:-../gerrit6}
 [ -d "$SRC" ] || { echo "error: gerrit checkout not found: $SRC" >&2; exit 1; }
 SRC=$(cd "$SRC" && pwd)
 
-# core per-area slices (target //openapi:openapi_<name>_json)
+# core per-area slices (target //tools/openapi:openapi_<name>_json)
 DOMAINS=(access accounts changes config flow groups plugins projects)
 # plugins with their own OpenAPI document: "<package-dir> <target-name>"
 # NOTE: these still reference the plugin packages' own openapi targets; they are
@@ -34,8 +34,8 @@ PLUGINS=(
 echo "1/4 build the OpenAPI documents in $SRC"
 # openapi_json also drives the miner's worklist report (openapi-overrides-report.json),
 # which the statistics step reads; name it so it is always present in bazel-bin.
-TARGETS="//openapi:openapi_json //openapi:openapi-overrides-report.json"
-for d in "${DOMAINS[@]}"; do TARGETS="$TARGETS //openapi:openapi_${d}_json"; done
+TARGETS="//tools/openapi:openapi_json //tools/openapi:openapi-overrides-report.json"
+for d in "${DOMAINS[@]}"; do TARGETS="$TARGETS //tools/openapi:openapi_${d}_json"; done
 for entry in "${PLUGINS[@]}"; do
   set -- $entry
   TARGETS="$TARGETS //plugins/$1:$2"
@@ -44,9 +44,9 @@ done
 
 BIN="$SRC/bazel-bin"
 echo "2/4 copy build outputs into the published tree"
-cp "$BIN/openapi/all-domain-openapi.generated.json" core/openapi.json
+cp "$BIN/tools/openapi/all-domain-openapi.generated.json" core/openapi.json
 for d in "${DOMAINS[@]}"; do
-  cp "$BIN/openapi/${d}-openapi.generated.json" "core/domains/${d}.json"
+  cp "$BIN/tools/openapi/${d}-openapi.generated.json" "core/domains/${d}.json"
 done
 for entry in "${PLUGINS[@]}"; do
   set -- $entry
@@ -75,8 +75,8 @@ echo "4/4 refresh statistics (rendered from the ruleset's stats tool -- one sour
 # local_path_override the gerrit checkout uses.
 SNAP=$(mktemp)
 python3 "$SRC/../gerrit_rules_openapi/extractor/py/stats_report.py" --json \
-  "$BIN/openapi/all-domain-openapi.generated.json" \
-  "$BIN/openapi/openapi-overrides-report.json" > "$SNAP"
+  "$BIN/tools/openapi/all-domain-openapi.generated.json" \
+  "$BIN/tools/openapi/openapi-overrides-report.json" > "$SNAP"
 python3 tools/gen_stats.py --stats "$SNAP"
 rm -f "$SNAP"
 
