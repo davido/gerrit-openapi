@@ -23,15 +23,14 @@ SRC=$(cd "$SRC" && pwd)
 # core per-area slices (target //tools/openapi:openapi_<name>_json)
 DOMAINS=(access accounts changes config flow groups plugins projects)
 # plugins with their own OpenAPI document: "<package-dir> <target-name>"
-# NOTE: these still reference the plugin packages' own openapi targets; they are
-# orthogonal to the core migration and must be retargeted when the plugin side
-# moves onto the ruleset's openapi_plugin_spec.
+# Migrated onto the ruleset's openapi_plugin_spec (root-BUILD targets); their
+# context_overrides compose underneath core's //tools/openapi generated overrides.
 PLUGINS=(
   "checks checks_openapi_json"
   "code-owners code_owners_openapi_json"
 )
 
-echo "1/4 build the OpenAPI documents in $SRC"
+echo "1/5 build the OpenAPI documents in $SRC"
 # openapi_json also drives the miner's worklist report (openapi-overrides-report.json),
 # which the statistics step reads; name it so it is always present in bazel-bin.
 TARGETS="//tools/openapi:openapi_json //tools/openapi:openapi-overrides-report.json"
@@ -43,7 +42,7 @@ done
 ( cd "$SRC" && bazel build $TARGETS 2>&1 | tail -1 )
 
 BIN="$SRC/bazel-bin"
-echo "2/4 copy build outputs into the published tree"
+echo "2/5 copy build outputs into the published tree"
 cp "$BIN/tools/openapi/all-domain-openapi.generated.json" core/openapi.json
 for d in "${DOMAINS[@]}"; do
   cp "$BIN/tools/openapi/${d}-openapi.generated.json" "core/domains/${d}.json"
@@ -56,7 +55,7 @@ done
 # bazel outputs are read-only; the published copies are normal files.
 chmod -R u+w core plugins
 
-echo "3/4 sanity: the domain slices must partition the monolith"
+echo "3/5 sanity: the domain slices must partition the monolith"
 python3 - <<'PY'
 import glob, json, sys
 mono = len(json.load(open("core/openapi.json")).get("paths", {}))
@@ -68,7 +67,7 @@ print(f"   core paths={mono}  sum(core/domains)={areas}  version={ver}  "
 sys.exit(0 if ok else 1)
 PY
 
-echo "4/4 refresh statistics (rendered from the ruleset's stats tool -- one source, no recompute)"
+echo "4/5 refresh statistics (rendered from the ruleset's stats tool -- one source, no recompute)"
 # The stats tool now lives in the gerrit_rules_openapi ruleset (lifted out of core's
 # //tools/openapi/py); it emits JSON and gen_stats.py only formats it into STATISTICS.md
 # + accumulates the per-release history. $SRC/../gerrit_rules_openapi mirrors the
@@ -79,6 +78,30 @@ python3 "$SRC/../gerrit_rules_openapi/extractor/py/stats_report.py" --json \
   "$BIN/tools/openapi/openapi-overrides-report.json" > "$SNAP"
 python3 tools/gen_stats.py --stats "$SNAP"
 rm -f "$SNAP"
+
+echo "5/5 build the distributable bundle (joined spec + all domains + manifest)"
+# One versioned zip for build-time consumers (e.g. gerrit-openapi-viewer) to pin
+# via http_file + sha256 -- one artifact, one hash, atomic across a generation.
+VERSION=$(python3 -c 'import json;print(json.load(open("core/openapi.json"))["info"]["version"])')
+mkdir -p dist
+BUNDLE="dist/openapi-json-bundle-${VERSION}.zip"
+STAGE=$(mktemp -d)
+cp core/openapi.json "$STAGE/openapi.json"
+mkdir -p "$STAGE/domains" && cp core/domains/*.json "$STAGE/domains/"
+python3 - "$STAGE" "$VERSION" <<'PY'
+import glob, hashlib, json, os, sys
+stage, version = sys.argv[1], sys.argv[2]
+sha = lambda f: hashlib.sha256(open(f, "rb").read()).hexdigest()
+files = {os.path.relpath(f, stage): sha(f)
+         for f in [os.path.join(stage, "openapi.json"), *sorted(glob.glob(stage + "/domains/*.json"))]}
+json.dump({"version": version, "files": files},
+          open(os.path.join(stage, "manifest.json"), "w"), indent=2, sort_keys=True)
+PY
+rm -f "$BUNDLE"
+( cd "$STAGE" && zip -qrX - openapi.json domains manifest.json ) > "$BUNDLE"
+rm -rf "$STAGE"
+printf '   wrote %s (sha256 %s)\n' "$BUNDLE" "$(shasum -a 256 "$BUNDLE" | cut -d' ' -f1)"
+echo "   publish: git tag v${VERSION} && gh release create v${VERSION} \"$BUNDLE\" --title \"$VERSION\""
 
 echo
 echo "done. Review the diff and commit; at a release, tag to match info.version:"
