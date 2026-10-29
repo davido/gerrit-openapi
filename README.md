@@ -38,6 +38,9 @@ plugins/
     openapi.json            # each plugin's own REST API (its own document)
   code-owners/
     openapi.json
+baseline/                   # pinned release manifests, for release-over-release diffs
+stats/                      # computed surface statistics (feeds STATISTICS.md)
+tools/                      # helper scripts (e.g. gen_stats.py)
 ```
 
 ### The three tiers
@@ -104,8 +107,8 @@ formatted here, so there is no second source to drift.
 ## Versioning
 
 Each document carries the Gerrit release label in `info.version` (e.g.
-`3.15.0-SNAPSHOT`). Released specs are tagged to match the Gerrit release
-(`v3.15.0`); pin a tag when you consume a spec so your generated code is
+`3.16.0-SNAPSHOT`). Released specs are tagged to match the Gerrit release
+(`v3.16.0`); pin a tag when you consume a spec so your generated code is
 reproducible. `-SNAPSHOT` documents track an in-development release and may
 change.
 
