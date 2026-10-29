@@ -11,7 +11,8 @@ of truth.
 
 ## How these documents are generated
 
-![Gerrit OpenAPI generation pipeline](resources/gerrit-openapi-pipeline.png)
+They are produced by the [`gerrit_rules_openapi`](https://github.com/davido/gerrit_rules_openapi#how-it-works)
+build-time ruleset — see its **How it works** section for the full pipeline diagram.
 
 Gerrit's Java REST bindings supply the structure (operations, parameters, schemas)
 and the handwritten REST docs supply the prose (summaries, descriptions,
