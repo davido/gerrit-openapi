@@ -2,14 +2,15 @@
 """Render the published statistics from a stats JSON snapshot.
 
 This is a *renderer*, not a second statistics implementation. The numbers are
-computed once in the Gerrit tree (`bazel run //tools/openapi:stats -- --json`) and
+computed once by the ruleset's stats tool
+(`gerrit_rules_openapi/extractor/py/stats_report.py --json`) and
 handed here; this script only accumulates them into a per-release history and
 formats STATISTICS.md. That keeps a single source of truth for the figures -- there
 is exactly one place that counts endpoints/schemas/fields, and it lives next to the
 spec it counts.
 
 Flow (driven by ./update.sh):
-  bazel run //tools/openapi:stats -- --json  >  snapshot.json
+  gerrit_rules_openapi/extractor/py/stats_report.py --json ...  >  snapshot.json
   tools/gen_stats.py --stats snapshot.json --date YYYY-MM-DD
 
 It upserts the snapshot into stats/history.json keyed by info.version (a release
@@ -133,7 +134,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--stats", required=True,
-                    help="stats snapshot JSON from //tools/openapi:stats --json")
+                    help="stats snapshot JSON from stats_report.py --json")
     ap.add_argument("--date", default=datetime.date.today().isoformat(),
                     help="ISO date to stamp this snapshot (default: today)")
     args = ap.parse_args()

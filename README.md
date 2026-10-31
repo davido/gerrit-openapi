@@ -59,7 +59,7 @@ tools/                      # helper scripts (e.g. gen_stats.py)
 
 ## Using it
 
-Generate a client with any OpenAPI 3.1 generator. The SDKs above are built with
+Generate a client with any OpenAPI 3.1 generator. The SDKs below are built with
 [OpenAPI Generator](https://openapi-generator.tech/) — see its
 [documentation](https://openapi-generator.tech/docs/usage/) for how generation
 works and the full list of target languages and options:
