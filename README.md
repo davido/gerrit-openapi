@@ -16,7 +16,7 @@ build-time ruleset — see its **How it works** section for the full pipeline di
 
 Gerrit's Java REST bindings supply the structure (operations, parameters, schemas)
 and the handwritten REST docs supply the prose (summaries, descriptions,
-examples); the two are composed on the HTTP method + REST path into an OpenAPI 3.1
+examples). The two are composed on the HTTP method + REST path into an OpenAPI 3.1
 document at build time. The result is what is published here.
 
 ## Layout
@@ -101,14 +101,14 @@ commit on demand):
 [STATISTICS.md](STATISTICS.md) summarizes the published surface — endpoint, schema,
 and field counts, a per-area breakdown (Changes, Projects, Accounts, …), and a
 release-over-release history table. It is regenerated on every `./update.sh` from the
-same specs published here; the figures are computed once in the Gerrit tree and only
-formatted here, so there is no second source to drift.
+same specs published here. The figures are computed once in the Gerrit tree and
+only formatted here, so there is no second source to drift.
 
 ## Versioning
 
 Each document carries the Gerrit release label in `info.version` (e.g.
 `3.16.0-SNAPSHOT`). Released specs are tagged to match the Gerrit release
-(`v3.16.0`); pin a tag when you consume a spec so your generated code is
+(`v3.16.0`). Pin a tag when you consume a spec so your generated code is
 reproducible. `-SNAPSHOT` documents track an in-development release and may
 change.
 
@@ -116,7 +116,7 @@ change.
 
 Generated from Gerrit's parse-only OpenAPI emitter over the server's REST
 bindings; descriptions are mined from Gerrit's own REST API documentation. To
-refresh, re-copy the build outputs from a Gerrit checkout — do not edit the JSON
+refresh, re-copy the build outputs from a Gerrit checkout. Do not edit the JSON
 here by hand.
 
 ## License

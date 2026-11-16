@@ -130,7 +130,7 @@
           "POST": 43,
           "PUT": 9,
           "DELETE": 15,
-          "documented": 127
+          "documented": 125
         },
         "projects": {
           "ops": 72,
@@ -178,7 +178,7 @@
           "POST": 0,
           "PUT": 0,
           "DELETE": 0,
-          "documented": 1
+          "documented": 0
         }
       },
       "date": "2026-10-25"
