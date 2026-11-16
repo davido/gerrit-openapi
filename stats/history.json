@@ -19,7 +19,7 @@
       "schemas": {
         "count": 289,
         "enums": 46,
-        "fields": 1182
+        "fields": 1196
       },
       "documentation": {
         "spec_operations": 339,
@@ -90,7 +90,7 @@
           "documented": 0
         }
       },
-      "date": "2026-11-15"
+      "date": "2026-11-16"
     },
     {
       "version": "3.15.0-SNAPSHOT",
