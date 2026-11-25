@@ -119,6 +119,19 @@ bindings; descriptions are mined from Gerrit's own REST API documentation. To
 refresh, re-copy the build outputs from a Gerrit checkout. Do not edit the JSON
 here by hand.
 
+To prepare a regeneration before publishing a ruleset commit, select its clean
+local checkout explicitly:
+
+```bash
+OPENAPI_RULESET_PATH=../gerrit_rules_openapi ./update.sh ../gerrit6
+```
+
+This uses the local ruleset's HEAD for both generation and statistics, runs
+core and plugin gates, and leaves Gerrit's module pin unchanged. Update that
+pin to the published commit before treating Gerrit's normal build as verified
+against the new ruleset. Without this variable, generation uses the committed
+archive pin as before.
+
 ## License
 
 [Apache License 2.0](LICENSE.txt) — the same license as Gerrit Code Review, from

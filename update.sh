@@ -14,12 +14,42 @@
 # tree), so the numbers match the pinned toolchain regardless of local edits.
 #
 # Usage: ./update.sh [path-to-gerrit-checkout]     (default: ../gerrit6)
+# OPENAPI_RULESET_PATH=/path/to/clean/ruleset selects a local committed ruleset
+# before its archive pin is published. It does not update Gerrit's module pin.
 set -euo pipefail
 cd "$(dirname "$0")"
 
 SRC=${1:-../gerrit6}
 [ -d "$SRC" ] || { echo "error: gerrit checkout not found: $SRC" >&2; exit 1; }
 SRC=$(cd "$SRC" && pwd)
+
+if command -v bazelisk >/dev/null; then
+  BAZEL=bazelisk
+else
+  BAZEL=bazel
+fi
+BAZEL_FLAGS=(--noannounce_rc)
+RULESET="$SRC/../gerrit_rules_openapi"
+if [ -n "${OPENAPI_RULESET_PATH:-}" ]; then
+  RULESET=$(cd "$OPENAPI_RULESET_PATH" && pwd)
+  [ -z "$(git -C "$RULESET" status --porcelain)" ] || {
+    echo "update.sh: local ruleset must be clean so generation matches its commit" >&2
+    exit 1
+  }
+  PIN=$(git -C "$RULESET" rev-parse HEAD)
+  BAZEL_FLAGS+=("--override_module=gerrit_rules_openapi=$RULESET" --lockfile_mode=off)
+  echo "Using local ruleset $PIN; Gerrit's committed archive pin is unchanged."
+else
+  PIN=$(sed -nE 's#.*/archive/([0-9a-f]{40})\.tar\.gz.*#\1#p' "$SRC/MODULE.bazel" | head -1)
+  [ -n "$PIN" ] || {
+    echo "update.sh: could not parse the ruleset archive pin from $SRC/MODULE.bazel" >&2
+    exit 1
+  }
+fi
+git -C "$RULESET" cat-file -e "${PIN}^{commit}" 2>/dev/null || {
+  echo "update.sh: $RULESET does not contain the selected ruleset commit $PIN; fetch it." >&2
+  exit 1
+}
 
 # core per-area slices (target //tools/openapi:openapi_<name>_json)
 DOMAINS=(access accounts changes config flow groups plugins projects)
@@ -43,7 +73,7 @@ done
 # Keep success quiet (just bazel's summary line) but surface the full log on failure --
 # piping straight to `tail -1` would swallow the actual error and mask bazel's exit code.
 BUILD_LOG=$(mktemp)
-if ( cd "$SRC" && bazel build $TARGETS ) >"$BUILD_LOG" 2>&1; then
+if ( cd "$SRC" && "$BAZEL" build "${BAZEL_FLAGS[@]}" $TARGETS ) >"$BUILD_LOG" 2>&1; then
   tail -1 "$BUILD_LOG"
 else
   echo "   build FAILED in $SRC -- bazel output:" >&2
@@ -60,7 +90,11 @@ echo "2/6 run the publishing gates before copying outputs"
 GATE_TARGETS="//tools/openapi:openapi_domain_slices_test"
 GATE_TARGETS="$GATE_TARGETS //tools/openapi:all_domain_spec_test"
 GATE_TARGETS="$GATE_TARGETS //tools/openapi:all_domain_golden_test"
-if ( cd "$SRC" && bazel test $GATE_TARGETS ) >>"$BUILD_LOG" 2>&1; then
+for entry in "${PLUGINS[@]}"; do
+  set -- $entry
+  GATE_TARGETS="$GATE_TARGETS //plugins/$1:${2}_spec_test //plugins/$1:${2}_golden_test"
+done
+if ( cd "$SRC" && "$BAZEL" test "${BAZEL_FLAGS[@]}" $GATE_TARGETS ) >>"$BUILD_LOG" 2>&1; then
   tail -1 "$BUILD_LOG"
   rm -f "$BUILD_LOG"
 else
@@ -104,13 +138,6 @@ echo "5/6 refresh statistics (rendered from the ruleset's stats tool -- one sour
 # would accept a locally edited tool at the matching HEAD and feed the published numbers.
 # Reading the blob at the pin is byte-exact to the pinned toolchain regardless of local
 # edits. Fail -- do not silently skip -- if the pin cannot be parsed or is not present.
-RULESET="$SRC/../gerrit_rules_openapi"
-PIN=$(sed -nE 's#.*/archive/([0-9a-f]{40})\.tar\.gz.*#\1#p' "$SRC/MODULE.bazel" | head -1)
-[ -n "$PIN" ] || { echo "update.sh: could not parse the ruleset archive pin from $SRC/MODULE.bazel" >&2; exit 1; }
-git -C "$RULESET" cat-file -e "${PIN}^{commit}" 2>/dev/null || {
-  echo "update.sh: $RULESET does not contain the pinned ruleset commit $PIN; fetch it." >&2
-  exit 1
-}
 STATS_TOOL=$(mktemp)
 git -C "$RULESET" show "${PIN}:extractor/py/stats_report.py" > "$STATS_TOOL" 2>/dev/null || {
   echo "update.sh: pinned ruleset commit $PIN has no extractor/py/stats_report.py" >&2
